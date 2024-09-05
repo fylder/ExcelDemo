@@ -37,6 +37,7 @@ object ExcelTool {
             // 判断首个空字符跳过(android_id不能为空)
             row1.getCell(0) ?: continue
             row1.getCell(0).rawValue ?: continue
+            row1.getCell(0).stringCellValue ?: continue
 
             // 根据首行数量遍历所有对应列内容
             for (column in 0 until itemSize) {
