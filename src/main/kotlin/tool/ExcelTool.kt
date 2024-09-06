@@ -13,6 +13,9 @@ object ExcelTool {
      * 读取xlsx
      */
     fun readExcel(path: String, sheetName: String): ArrayList<KeyName> {
+        File(path.substring(0, path.lastIndexOf(File.separator))).let {
+            if (!it.exists()) it.mkdirs()
+        }
         val file = File(path)
         val wb = XSSFWorkbook(file)
         val sheet = wb.getSheet(sheetName)
@@ -189,9 +192,8 @@ object ExcelTool {
 
 }
 
-data class KeyName(
-    var index: Int = 0, var key: String = "", var name: String = "", var items: Array<String> = arrayOf()
-) {
+data class KeyName(var index: Int = 0, var key: String = "", var name: String = "", var items: Array<String> = arrayOf()) {
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

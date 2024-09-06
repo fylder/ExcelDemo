@@ -24,7 +24,6 @@ class ExcelDemo {
     private val resDir = "./resources" //资源根目录
     private val sheetName = "Sheet0" //表格名称
 
-    //    private val sheetName = "CarPal" //表格名称
     private val filterKeyName = arrayListOf("android_id", "id")  //该行不写入文件
 
     fun startTask() {
@@ -40,11 +39,11 @@ class ExcelDemo {
     }
 
     // ["校正英文", "繁体中文", "日语", "俄语", "德语", "西班牙语", "葡萄牙语", "法语", "意大利语", "波兰语", "荷兰"]
-    // typeStr必须与表格上的文本一致
+    // typeStr与表格上的文本模糊匹配
     private fun writeMoreXml(beans: ArrayList<KeyName>) {
 
         val types: ArrayList<XmlType> = arrayListOf()
-        types.add(XmlType(type = "zh", typeStr = "zh"))
+        types.add(XmlType(type = "zh", typeStr = "zh")) //中文特殊类型,不需要修改
         types.add(XmlType(type = "en", typeStr = "校正英文"))
         types.add(XmlType(type = "zh-hk", typeStr = "繁体中文"))
         types.add(XmlType(type = "jp", typeStr = "日语"))
@@ -60,13 +59,11 @@ class ExcelDemo {
         types.add(XmlType(type = "nl", typeStr = "荷兰语"))
         types.add(XmlType(type = "ko", typeStr = "韩语"))
         types.add(XmlType(type = "cs", typeStr = "捷克"))
-//        types.add(XmlType(type = "uk", typeStr = "乌克兰"))
-//        types.add(XmlType(type = "nl", typeStr = "荷兰"))
         types.add(XmlType(type = "tr", typeStr = "土耳其"))
-//        types.add(XmlType(type = "da", typeStr = "丹麦"))
-//        types.add(XmlType(type = "no", typeStr = "挪威"))
-//        types.add(XmlType(type = "sv", typeStr = "瑞典"))
-//        types.add(XmlType(type = "ar", typeStr = "阿拉伯"))
+        types.add(XmlType(type = "da", typeStr = "丹麦"))
+        types.add(XmlType(type = "no", typeStr = "挪威"))
+        types.add(XmlType(type = "sv", typeStr = "瑞典"))
+        types.add(XmlType(type = "ar", typeStr = "阿拉伯"))
         types.add(XmlType(type = "sk", typeStr = "斯洛伐克"))
         types.add(XmlType(type = "fi", typeStr = "芬兰"))
         types.add(XmlType(type = "sr", typeStr = "塞尔维亚"))
@@ -76,7 +73,7 @@ class ExcelDemo {
         // 中文
         ExcelTool.writeXml(beans, outDir = "${resDir}/${project}/res/values-zh", filterKeys = filterKeyName)
 
-        // 其它语言
+        // 其它语言 - 检索表格上到的语言
         for (index in 0 until beans[0].items.size) {
             var xmlType: XmlType? = null
             run stop@{
