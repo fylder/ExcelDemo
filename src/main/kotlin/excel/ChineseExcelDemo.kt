@@ -1,5 +1,6 @@
 package excel
 
+import bean.XmlType
 import tool.ExcelTool
 import tool.KeyName
 
@@ -7,17 +8,17 @@ import tool.KeyName
  * 导出strings.xml
  */
 class ChineseExcelDemo {
+
     private val project = "topvci" //项目名
-    private val xmlName = "topvci_2024-01-20.xlsx" //读取文件
+    private val xlsxName = "topvci_2024-01-20.xlsx" //读取文件
     private val resDir = "./resources" //资源根目录
     private val sheetName = "Sheet0" //表格
 
-    //    private val sheetName = "lms" //表格
     private val keyName = arrayListOf("android_id", "id")  //该行不写入文件
     private var isSuccess = true
 
     fun startTask() {
-        val filePath = "${resDir}/${project}/${xmlName}"
+        val filePath = "${resDir}/${project}/${xlsxName}"
         println("解析${filePath}")
         val bean = ExcelTool.readExcel(path = filePath, sheetName = sheetName)
         writeMoreXml(bean)
@@ -52,12 +53,9 @@ class ChineseExcelDemo {
                 }
             }
             xmlType?.let {
-                println("type: ${it.type}, index: $index")
                 ExcelTool.writeXml(beans, outDir = "${resDir}/${project}/res/values-${it.type}", index = index, filterKeys = keyName)
             }
         }
     }
 
-
-    data class XmlType(val type: String, val typeStr: String)
 }

@@ -1,5 +1,7 @@
 package tool
 
+import bean.XmlType
+import config.LanConfig
 import excel.ExcelDemo
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
@@ -40,7 +42,7 @@ object ExcelTool {
             // 判断首个空字符跳过(android_id不能为空)
             row1.getCell(0) ?: continue
             row1.getCell(0).rawValue ?: continue
-            row1.getCell(0).stringCellValue ?: continue
+            if (row1.getCell(0).stringCellValue.isNullOrBlank()) continue
 
             // 根据首行数量遍历所有对应列内容
             for (column in 0 until itemSize) {
@@ -97,8 +99,9 @@ object ExcelTool {
         outName: String = "strings_language.xml",
         index: Int = -1,
         filterKeys: ArrayList<String>,
-        lanType: ExcelDemo.XmlType = ExcelDemo.XmlType(type = "zh", typeStr = "zh"),
+        lanType: XmlType = XmlType(type = "zh", typeStr = "zh"),
     ): Boolean {
+        println("写入: value-${lanType.type}, index: $index")
         var currentItem: KeyName? = null
         var currentName = ""
         var currentOutDir = outDir
@@ -106,12 +109,14 @@ object ExcelTool {
             currentOutDir = currentOutDir.replace("/res/", "/res_filter_empty/")
         }
         try {
+            val tab = "    " //空白间隔
             val template = StringBuilder()
             template.append("<?xml version=\"1.0\" encoding=\"utf-8\"?>").append("\n")
             template.append("<resources>").append("\n")
             template.append("%s")
             template.append("</resources>").append("\n")
             val values = StringBuilder()
+            values.append(tab).append("<!-- ${lanType.typeStr}-->").append("\n")
             beans.forEach {
                 if (filterKeys.contains(it.key.lowercase())) {
                     return@forEach //返回继续下一个
@@ -124,20 +129,20 @@ object ExcelTool {
                 val str: String = "<string name=\"" + it.key + "\">" + nameStr + "</string>"
                 if (ExcelDemo.XML_VALUE_EMPTY) {
                     //方案一 值为空也写入
-                    values.append("\t").append(str).append("\n")
+                    values.append(tab).append(str).append("\n")
                 } else {
                     //方案二 值为空不写入
                     if (nameStr.isNotBlank()) {
-                        values.append("\t").append(str).append("\n")
+                        values.append(tab).append(str).append("\n")
                     } else {
-                        if (lanType.type == "en") {
+                        if (lanType.type == LanConfig.DEFAULT_LAN) {
                             //默认英文为空,用中文代替,必须保证默认有值
                             println("默认英文为空,用中文代替,请及时翻译 $it")
                             var cnNameStr = it.name
                             // 矫正字符
                             cnNameStr = strReplace(cnNameStr)
                             val cnStr: String = "<string name=\"" + it.key + "\">" + cnNameStr + "</string>"
-                            values.append("\t").append(cnStr).append("\n")
+                            values.append(tab).append(cnStr).append("\n")
                         }
                     }
                 }
@@ -165,6 +170,7 @@ object ExcelTool {
         result = result.replace(" ", " ")
         result = result.replace("'", "\\'").replace("\\\\'", "\\'")
         result = result.replace("%@", "%s")
+        result = result.replace("@%", "%s")
         result = result.replace("<", "&lt;")
         return result
     }
