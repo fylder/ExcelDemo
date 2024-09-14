@@ -13,6 +13,7 @@ class ExcelDemo {
 
     companion object {
         const val XML_VALUE_EMPTY = false //输出的string.xml字段是否允许空内容
+        const val EMPTY_REPLACE_DEFAULT = true //[中文, 英文]之外其他语言为空时,是否用默认语言代替
     }
 
 //    private val project = "js2000" //项目名

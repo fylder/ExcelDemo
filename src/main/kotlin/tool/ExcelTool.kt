@@ -90,7 +90,7 @@ object ExcelTool {
      *
      * @param beans     表格内容键值对
      * @param outDir    输出目录
-     * @param index     0为中文    大于0为其它语言序号
+     * @param index     默认-1为中文    大于或等于0为其它语言序号[KeyName.items]
      * @param filterKeys  过滤写入的key
      */
     fun writeXml(
@@ -133,8 +133,10 @@ object ExcelTool {
                 } else {
                     //方案二 值为空不写入
                     if (nameStr.isNotBlank()) {
+                        //正常写入
                         values.append(tab).append(str).append("\n")
                     } else {
+                        //表格空值
                         if (lanType.type == LanConfig.DEFAULT_LAN) {
                             //默认英文为空,用中文代替,必须保证默认有值
                             println("默认英文为空,用中文代替,请及时翻译 $it")
@@ -143,6 +145,18 @@ object ExcelTool {
                             cnNameStr = strReplace(cnNameStr)
                             val cnStr: String = "<string name=\"" + it.key + "\">" + cnNameStr + "</string>"
                             values.append(tab).append(cnStr).append("\n")
+                        } else if (index > 1) {
+                            //排除[中文, 英文]的其他语言,内容为空值,补充默认值
+                            if (ExcelDemo.EMPTY_REPLACE_DEFAULT) {
+                                var enNameStr = it.items[0]
+                                if (enNameStr.isNotBlank()) {
+                                    // 矫正字符
+                                    enNameStr = strReplace(enNameStr)
+                                    val enStr: String = "<string name=\"" + it.key + "\">" + enNameStr + "</string>"
+                                    values.append(tab).append(enStr).append("\n")
+                                    Log.println("内容为空值,补充默认值 ${it.key}, ${enNameStr}")
+                                }
+                            }
                         }
                     }
                 }
