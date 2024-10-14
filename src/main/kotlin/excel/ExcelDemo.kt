@@ -30,7 +30,7 @@ class ExcelDemo {
     private val filterKeyName = arrayListOf("android_id", "id")  //该行不写入文件
 
     fun startTask() {
-        val filePath = "${resDir}/${project}/${xlsxName}"
+        val filePath = "${resDir}${File.separator}${project}${File.separator}${xlsxName}"
         println("解析${filePath}")
         clearRes()
         val bean = ExcelTool.readExcel(path = filePath, sheetName = sheetName)
