@@ -182,11 +182,21 @@ object ExcelTool {
     private fun strReplace(str: String): String {
         var result = str
         result = result.replace(" ", " ")
-        result = result.replace("'", "\\'").replace("\\\\'", "\\'")
+        result = replaceQuote(result, "'")
+        result = replaceQuote(result, "\"")
         result = result.replace("%@", "%s")
         result = result.replace("@%", "%s")
         result = result.replace("<", "&lt;")
         return result
+    }
+
+    /**
+     * 第二个replace防止原本已经是\',在第一个replace时变成\\'
+     * @param char  矫正引号'或"
+     */
+    private fun replaceQuote(str: String, char: String): String {
+        return str.replace(char, "\\${char}")
+            .replace("\\\\${char}", "\\${char}")
     }
 
     //单元格序号
