@@ -187,6 +187,7 @@ object ExcelTool {
         result = result.replace("%@", "%s")
         result = result.replace("@%", "%s")
         result = result.replace("<", "&lt;")
+        result = result.replace(">", "&gt;")
         return result
     }
 
