@@ -33,8 +33,27 @@ object ExcelTool {
         }
         // 遍历sheet所有行
         val dataList = arrayListOf<KeyName>()
-        val itemSize = sheet.getRow(0).lastCellNum //读取首行个数
+        var itemSize = sheet.getRow(0).lastCellNum //读取首行个数
+        val titleList = HashMap<Int, String>() //首行内容
         Log.println("检索行数: ${sheet.lastRowNum}", isPrint = false)
+        try {
+            //首行内容
+            for (column in 0 until itemSize) {
+                titleList[column] = sheet.getRow(0).getCell(column).stringCellValue
+            }
+            //修正首行个数
+            for (index in titleList.size - 1 downTo 0) {
+                if (titleList[index].isNullOrBlank()) {
+                    itemSize--
+                } else {
+                    break
+                }
+            }
+            Log.println("检索首行个数: $itemSize", isPrint = false)
+        } catch (e: Exception) {
+            println("判断首行个数异常: ${e.message}")
+        }
+
         for (row in 0..sheet.lastRowNum) {
             val row1 = sheet.getRow(row) ?: continue //获取行
             val bean = KeyName()
