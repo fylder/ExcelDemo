@@ -5,12 +5,13 @@ import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.w3c.dom.Element
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
+import javax.xml.parsers.DocumentBuilderFactory
 
 /**
  * xml转excel
@@ -20,73 +21,22 @@ import kotlin.collections.ArrayList
  * implementation 'org.apache.xmlbeans:xmlbeans:3.1.0'
  *
  */
+
+private const val hasSort = false //是否对key排序
+
 fun main() {
     println("start")
-    val file = File("./resources/xml/strings_zh_2025-06-28.xml")
-    val lines = file.readLines()
+    val file = File("./resources/xml/strings.xml")
     val keyName = arrayListOf<XMLBean>()
-
-    readLine(lines, keyName)
-    keyName.sortWith { b1, b2 -> b1.key.compareTo(b2.key) }
-
+    parseStringsXml(file).forEach {
+        keyName.add(XMLBean(key = it.key, name = it.value))
+    }
+    if (hasSort) {
+        keyName.sortWith { b1, b2 -> b1.key.compareTo(b2.key) }
+    }
     exportExcel(listData = keyName, fileDir = "./resources/xml/output", fileName = "ahh_${getNowDate()}.xlsx")
     println("finish")
 }
-
-fun getKey(str: String): String {
-    val startFlag = "<string name=\""
-    val endFlag = "\">"
-    val indexStart = str.indexOf(startFlag) + startFlag.length
-    val indexEnd = str.indexOf(endFlag)
-    return str.substring(indexStart, indexEnd)
-}
-
-fun getName(str: String): String {
-    val startFlag = "\">"
-    val endFlag = "</string>"
-    val indexStart = str.indexOf(startFlag) + startFlag.length
-    val indexEnd = str.indexOf(endFlag)
-    return str.substring(indexStart, indexEnd)
-}
-
-//读取xml内容
-fun readLine(lines: List<String>, keyName: ArrayList<XMLBean>) {
-    val strBuilder = StringBuilder()
-    var readItemFinish = false
-    lines.forEach {
-        if (it.contains("<string name") && it.contains("</string>")) {
-            //完整一行
-            strBuilder.append(it)
-            readItemFinish = true
-        } else if (it.contains("<string name") && !it.contains("</string>")) {
-            //多行开始
-            strBuilder.append(it)
-        } else if (!it.contains("<string name") && it.contains("</string>")) {
-            //多行结尾
-            strBuilder.append("\n").append(it)
-            readItemFinish = true
-        } else {
-            //中间部分
-            if (strBuilder.isNotEmpty()) {
-                //继续追加内容
-                strBuilder.append("\n").append(it)
-            } else {
-                if (it.isNotBlank()) {
-                    println("无效内容: $it")
-                }
-            }
-        }
-        if (readItemFinish) {
-            val str = strBuilder.toString()
-            val key = getKey(str)
-            val name = getName(str)
-            keyName.add(XMLBean(key = key, name = name))
-            strBuilder.clear()
-            readItemFinish = false
-        }
-    }
-}
-
 
 /**
  * 导出Excel
@@ -99,7 +49,7 @@ fun exportExcel(listData: List<XMLBean>, fileDir: String = "./xml", fileName: St
         val wb: Workbook = XSSFWorkbook()
         // 创建工作表
         val sheet: Sheet = wb.createSheet()
-        val title = arrayOf("key", "内容", "备注")
+        val title = arrayOf("key", "内容")
         // 创建行对象
         var row: Row = sheet.createRow(0)
         // 设置有效数据的行数和列数
@@ -143,6 +93,24 @@ fun exportExcel(listData: List<XMLBean>, fileDir: String = "./xml", fileName: St
     } catch (e: IOException) {
         println("Express Excel: ${e.message}")
         false
+    }
+}
+
+//读取xml内容
+fun parseStringsXml(file: File): Map<String, String> {
+    val factory = DocumentBuilderFactory.newInstance()
+    val builder = factory.newDocumentBuilder()
+    val document = builder.parse(file)
+
+    val resources = document.documentElement
+    val stringNodes = resources.getElementsByTagName("string")
+
+    return (0 until stringNodes.length).associate { i ->
+        val node = stringNodes.item(i) as Element
+        val name = node.getAttribute("name")
+        val value = node.textContent
+        println("解析内容   ${name}: ${value}")
+        name to value
     }
 }
 
